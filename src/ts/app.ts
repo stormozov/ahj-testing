@@ -1,13 +1,32 @@
-import { multiply, divide } from './utils/math';
+import CreditCardFormCreator from './widgets/CreditCardValidator/CreditCardFormCreator';
 
-multiply(2, 2);
-divide(2, 2);
+const initCreditCardValidator = (): void => {
+  const creditCardForm = document.querySelector('.card-widget');
+  /**
+   * Массив иконок методов оплаты.
+   */
+  const paymentMethodIcons: string[] = [
+    'Visa.svg',
+    'Mastercard.svg',
+    'Amex.svg',
+    'Discover.svg',
+    'JCB.svg',
+    'DinersClub.svg',
+    'Mir.svg',
+  ];
 
-const DB_TEST_HOST = `<p>DB_HOST: ${process.env.DB_TEST_HOST}</p>`;
-const mathResults = `<p>2 * 2 = ${multiply(2, 2)}</p><p>2 / 2 = ${divide(2, 2)}</p>`;
+  if (creditCardForm instanceof HTMLDivElement) {
+    const formCreator = new CreditCardFormCreator(
+      creditCardForm,
+      paymentMethodIcons
+    );
 
-const container: HTMLElement | null = document.querySelector('.js-container');
-if (container) {
-  container.insertAdjacentHTML('beforeend', DB_TEST_HOST);
-  container.insertAdjacentHTML('beforeend', mathResults);
-}
+    formCreator.render();
+  } else {
+    console.error(
+      'Element with class "card-widget" not found or is not a HTMLDivElement'
+    );
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => initCreditCardValidator());

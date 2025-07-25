@@ -97,8 +97,8 @@ export default {
     new CopyPlugin({
       patterns: [
         {
-          from: path.resolve(import.meta.dirname, '../src/assets/images'),
-          to: path.resolve(import.meta.dirname, '../dist/assets/images'),
+          from: path.resolve(import.meta.dirname, '../src/assets'),
+          to: path.resolve(import.meta.dirname, '../dist/assets'),
           globOptions: {
             ignore: ['**/.DS_Store'],
           },
