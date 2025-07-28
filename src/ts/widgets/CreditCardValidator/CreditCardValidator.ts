@@ -1,6 +1,6 @@
-import { ECardType } from './types/enums';
+import { displayMessage, isValidLuhn } from '../../utils/utils';
+import { ECardType, EValidateMessageText } from './types/enums';
 
-// Обновлённые паттерны, охватывающие диапазоны из таблицы
 const cardPatterns: Record<ECardType, RegExp> = {
   // Visa: Начинается с 4, длина 13, 16 или 19
   [ECardType.Visa]: /^4[0-9]{12}([0-9]{3})?([0-9]{3})?$/, // 13, 16, 19
@@ -13,141 +13,101 @@ const cardPatterns: Record<ECardType, RegExp> = {
   [ECardType.Amex]: /^3[47][0-9]{13}$/, // 15
 
   // Discover: 6011, 622126-622925, 644-649, 65, длина 16-19
-  // Паттерн для длины 16 (как в исходном коде)
+  // Паттерн для длины 16-19
   [ECardType.Discover]:
-    /^(6011[0-9]{12}|65[0-9]{14}|64[4-9][0-9]{13}|622(12[6-9]|1[3-9][0-9]|[2-8][0-9]{2}|9[0-1][0-9]|92[0-5])[0-9]{10})$/, // 16
+    /^(6011\d{12,15}|65\d{14,17}|64[4-9]\d{13,16}|622(12[6-9]|1[3-9]\d|[2-8]\d{2}|9[0-1]\d|92[0-5])\d{10,13})$/, // 16-19
 
   // Mir: 2200-2204, длина 16
-  [ECardType.Mir]: /^220[0-4][0-9]{12}$/, // 16
+  [ECardType.Mir]: /^220[0-4]\d{12}$/, // 16
 
-  // Diners Club: 300-305, 36, 54, длина 14 или 16
-  // Паттерн для длины 14 и 16 (как в исходном коде, предполагая 16 для 36 и 54)
-  [ECardType.DinersClub]: /^(30[0-5][0-9]{11}|36[0-9]{12}|54[0-9]{14})$/, // 14, 16
+  // Diners Club (объединённые диапазоны из таблицы): 300-305 (14), 36 (14), 54 (16)
+  // Предполагаем, что длина может быть 14 или 16
+  [ECardType.DinersClub]: /^(30[0-5]\d{11}|36\d{12}|54\d{14})$/, // 14, 16
 
   // JCB: 3528-3589, длина 16-19
-  // Паттерн для длины 16 (как в исходном коде)
-  [ECardType.Jcb]: /^35(2[89]|[3-8][0-9])[0-9]{12}$/, // 16
+  [ECardType.Jcb]: /^35(2[89]|[3-8]\d)\d{12,15}$/, // 16-19
 };
-
-/**
- * Проверяет номер кредитной карты по алгоритму Луна.
- * @param cardNumber Номер карты в виде строки. Может содержать пробелы.
- * @returns true, если номер валиден по алгоритму Луна, иначе false.
- */
-export function isValidLuhn(cardNumber: string): boolean {
-  // 1. Удалить все пробелы и проверить, что остались только цифры
-  const cleanedNumber = cardNumber.replace(/\s+/g, '');
-
-  // Проверка на пустую строку и наличие только цифр
-  if (!cleanedNumber || !/^\d+$/.test(cleanedNumber)) {
-    return false;
-  }
-
-  let sum = 0;
-  const digits = cleanedNumber.split('').map(Number); // Преобразуем в массив чисел
-  const len = digits.length;
-
-  // 2. Начинаем с правой цифры (последняя цифра - это check digit)
-  // Проходим по цифрам справа налево
-  for (let i = len - 1; i >= 0; i--) {
-    let digit = digits[i];
-
-    // 3. Определяем позицию: четная или нечетная (считая с 1 с конца)
-    // len - i дает позицию с 1 (1 - последняя цифра, 2 - предпоследняя и т.д.)
-    // Нам нужно удвоить цифры на нечетных позициях (1, 3, 5...)
-    // В коде проверяем четность (len - i) % 2, чтобы удвоить цифры на позициях 2, 4, 6...,
-    // которые в оригинальной строке стоят на нечетных местах (с конца).
-    if ((len - i) % 2 === 0) {
-      digit *= 2;
-      if (digit > 9) {
-        digit -= 9;
-      }
-    }
-
-    sum += digit;
-  }
-
-  // 4. Номер валиден, если сумма делится на 10 без остатка
-  return sum % 10 === 0;
-}
 
 /**
  * Валидирует номер кредитной карты.
  *
- * @param form HTMLFormElement, содержащая поля для ввода данных карты.
+ * @param {HTMLFormElement} form - HTMLFormElement, содержащая поля для ввода данных карты.
+ * @param {HTMLDivElement | undefined} messageBlock - HTMLDivElement для вывода сообщений валидации. Не обязателен.
+ *
+ * @returns {boolean} true, если номер карты валиден, иначе false.
  */
-export function validateCreditCard(form: HTMLFormElement): void {
+export function validateCreditCard(
+  form: HTMLFormElement,
+  messageBlock?: HTMLDivElement
+): boolean {
+  // --- 1. Проверка наличия формы ---
   if (!form) {
-    alert('Форма не найдена');
-    return;
+    displayMessage(messageBlock, EValidateMessageText.FormNotFound);
+    return false;
   }
 
-  // Get selected payment method radio input
-  const selectedPaymentMethodInput = form.querySelector(
+  // --- 2. Проверка выбора типа карты ---
+  const selectedPaymentMethodInput = form.querySelector<HTMLInputElement>(
     'input[name="payment-method"]:checked'
-  ) as HTMLInputElement | null;
+  );
 
   if (!selectedPaymentMethodInput) {
-    alert('Пожалуйста, выберите тип карты');
-    return;
+    displayMessage(messageBlock, EValidateMessageText.PaymentMethodNotFound);
+    return false;
   }
 
-  // Предполагается, что ID имеет формат типа 'payment-method-visa'
-  // или 'payment-method-mastercard-something'
+  // --- 3. Определение типа карты ---
   const paymentMethodId = selectedPaymentMethodInput.id.replace(
     'payment-method-',
     ''
   );
-  // Извлекаем тип, предполагая, что он идёт первым словом
   const paymentMethodKey = paymentMethodId
     .split('-')[0]
     .toLowerCase() as ECardType;
 
-  // Проверяем, существует ли такой тип в enum
   if (!Object.values(ECardType).includes(paymentMethodKey)) {
-    alert('Неизвестный тип карты');
-    return;
+    displayMessage(messageBlock, EValidateMessageText.InvalidCardType);
+    return false;
   }
 
-  // Get card number input
-  const cardNumberInput = form.querySelector(
-    `input[type="text"].credit-card-form__input, input[type="number"].credit-card-form__input`
-  ) as HTMLInputElement | null; // Добавил type="text" на случай, если номер содержит не только цифры
+  // --- 4. Получение номера карты ---
+  const cardNumberInput = form.querySelector<HTMLInputElement>(
+    'input.credit-card-form__input' // Убрано ограничение type="number"
+  );
 
   if (!cardNumberInput) {
-    alert('Поле для номера карты не найдено');
-    return;
+    displayMessage(messageBlock, EValidateMessageText.CardNumberFieldNotFound);
+    return false;
   }
 
-  const cardNumber = cardNumberInput.value; // Не удаляем пробелы сразу, isValidLuhn это сделает
+  const cardNumber = cardNumberInput.value;
 
   if (!cardNumber.trim()) {
-    // Проверяем на пустоту после trim
-    alert('Пожалуйста, введите номер карты');
-    return;
+    displayMessage(messageBlock, EValidateMessageText.InvalidCardNumber);
+    return false;
   }
 
-  // Validate card number pattern for selected payment method
-  const pattern = cardPatterns[paymentMethodKey]; // Используем paymentMethodKey
+  // --- 5. Проверка формата по паттерну ---
+  const pattern = cardPatterns[paymentMethodKey];
   if (!pattern) {
-    // Эта проверка вряд ли понадобится, так как мы уже проверили на includes, но пусть будет
-    alert('Неизвестный тип карты (паттерн не найден)');
-    return;
+    displayMessage(messageBlock, EValidateMessageText.InvalidCardType);
+    return false;
   }
 
-  // Сначала проверяем формат (паттерн)
-  const cleanedCardNumberForPatternCheck = cardNumber.replace(/\s+/g, ''); // Убираем пробелы для проверки паттерна
-  if (!pattern.test(cleanedCardNumberForPatternCheck)) {
-    alert('Неверный номер карты для выбранного типа');
-    return;
+  const cleanedCardNumber = cardNumber.replace(/\s+/g, '');
+  if (!pattern.test(cleanedCardNumber)) {
+    displayMessage(messageBlock, EValidateMessageText.InvalidCardNumberFormat);
+    return false;
   }
 
-  // Затем проверяем по алгоритму Луна
+  // --- 6. Проверка по алгоритму Луна ---
   if (!isValidLuhn(cardNumber)) {
     // Передаём исходную строку с пробелами
-    alert('Номер карты не прошёл проверку по алгоритму Луна');
-    return;
+    displayMessage(messageBlock, EValidateMessageText.InvalidCardNumberFormat);
+    return false;
   }
 
-  alert('Номер карты валиден');
+  // --- 7. Успешная валидация ---
+  displayMessage(messageBlock, EValidateMessageText.CorrectCardNumber, false);
+  return true;
 }

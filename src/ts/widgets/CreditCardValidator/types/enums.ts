@@ -10,3 +10,16 @@ export enum ECardType {
   DinersClub = 'dinersclub',
   Jcb = 'jcb',
 }
+
+/**
+ * Текст сообщений результата работы валидатора
+ */
+export enum EValidateMessageText {
+  CorrectCardNumber = 'Номер карты валиден',
+  FormNotFound = 'Форма не найдена',
+  InvalidCardNumber = 'Некорректный номер карты',
+  InvalidCardType = 'Некорректный тип карты',
+  PaymentMethodNotFound = 'Пожалуйста, выберите тип карты',
+  CardNumberFieldNotFound = 'Поле для номера карты не найдено',
+  InvalidCardNumberFormat = 'Неверный номер карты для выбранного типа карты',
+}

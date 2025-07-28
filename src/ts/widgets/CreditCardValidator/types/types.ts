@@ -7,6 +7,7 @@ export type FormElementsConfig = {
   paymentMethods: CreditCardFormPaymentMethods;
   input: CreditCardFormInput;
   submit: CreditCardFormSubmit;
+  status: CreditCardFormStatus;
 };
 
 /**
@@ -37,4 +38,13 @@ export type CreditCardFormInput = {
 export type CreditCardFormSubmit = {
   class: string;
   text: string;
+};
+
+/**
+ * Тип, описывающий элемент статуса проверки номера карты.
+ *
+ * @type {CreditCardFormStatus}
+ */
+export type CreditCardFormStatus = {
+  class: string;
 };

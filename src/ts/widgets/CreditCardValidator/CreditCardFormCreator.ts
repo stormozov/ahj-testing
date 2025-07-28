@@ -3,6 +3,7 @@ import { ICreditCardFormCreator } from './types/interfaces';
 import {
   CreditCardFormInput,
   CreditCardFormPaymentMethods,
+  CreditCardFormStatus,
   CreditCardFormSubmit,
   FormElementsConfig,
 } from './types/types';
@@ -29,12 +30,20 @@ export default class CreditCardFormCreator implements ICreditCardFormCreator {
       class: `${this._formClassName}__submit`,
       text: 'Проверить номер карты',
     },
+    status: {
+      class: `${this._formClassName}__status`,
+    },
   };
 
   /**
    * Путь к иконкам методов оплаты.
    */
   private _paymentMethodIconsPath = './assets/icons/payment-method';
+
+  /**
+   * Элемент для вывода сообщений валидации.
+   */
+  private _messageBlock: HTMLDivElement | null = null;
 
   constructor(
     private _container: HTMLDivElement,
@@ -59,8 +68,11 @@ export default class CreditCardFormCreator implements ICreditCardFormCreator {
     inputWrapper.append(input, submit);
     form.append(inputWrapper);
 
-    // Добавляем форму в контейнер на HTML страницу
-    this._container.append(form);
+    // Создаем блок для сообщений валидации
+    this._messageBlock = this._createStatus(this._formElementsConfig.status);
+
+    // Добавляем форму на страницу
+    this._container.append(form, this._messageBlock);
 
     // Инициализируем валидатор
     this._initValidator(form);
@@ -74,7 +86,7 @@ export default class CreditCardFormCreator implements ICreditCardFormCreator {
   private _initValidator(form: HTMLFormElement): void {
     form.addEventListener('submit', (event) => {
       event.preventDefault();
-      validateCreditCard(form);
+      if (this._messageBlock) validateCreditCard(form, this._messageBlock);
     });
   }
 
@@ -206,5 +218,18 @@ export default class CreditCardFormCreator implements ICreditCardFormCreator {
     submit.textContent = data.text;
 
     return submit;
+  }
+
+  /**
+   * Создает HTML элемент статуса проверки номера карты.
+   *
+   * @return {HTMLDivElement} Созданный элемент статуса валидации формы.
+   */
+  private _createStatus(data: CreditCardFormStatus): HTMLDivElement {
+    const messageBlock = document.createElement('div');
+    messageBlock.className = data.class;
+    messageBlock.style.display = 'none';
+
+    return messageBlock;
   }
 }

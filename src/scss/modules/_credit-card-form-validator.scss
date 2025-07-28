@@ -97,4 +97,11 @@
       background-color: rgb(54, 236, 69);
     }
   }
+
+  &__status {
+    margin-top: 48px;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+  }
 }
