@@ -1,3 +1,4 @@
+import { validateCreditCard } from './CreditCardValidator';
 import { ICreditCardFormCreator } from './types/interfaces';
 import {
   CreditCardFormInput,
@@ -60,6 +61,21 @@ export default class CreditCardFormCreator implements ICreditCardFormCreator {
 
     // Добавляем форму в контейнер на HTML страницу
     this._container.append(form);
+
+    // Инициализируем валидатор
+    this._initValidator(form);
+  }
+
+  /**
+   * Инициализирует валидатор для проверки номера карты.
+   *
+   * @param {HTMLFormElement} form Элемент формы.
+   */
+  private _initValidator(form: HTMLFormElement): void {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      validateCreditCard(form);
+    });
   }
 
   /**
