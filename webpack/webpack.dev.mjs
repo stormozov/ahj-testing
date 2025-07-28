@@ -12,9 +12,10 @@ export default merge(common, {
     open: true,
     hot: true,
     port: 3000,
-    historyApiFallback: false,
+    historyApiFallback: true,
     devMiddleware: {
       publicPath: '/',
+      writeToDisk: true,
     },
   },
 });

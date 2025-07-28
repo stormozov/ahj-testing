@@ -49,13 +49,14 @@ export default class CreditCardFormCreator implements ICreditCardFormCreator {
     const paymentMethodsList = this._createPaymentMethodList(
       this._formElementsConfig.paymentMethods
     );
+    const inputWrapper = this._createCardInputWrapper();
     const input = this._createInput(this._formElementsConfig.input);
     const submit = this._createSubmitButton(this._formElementsConfig.submit);
 
     // Соединяем элементы формы
     form.append(paymentMethodsList);
-    form.append(input);
-    form.append(submit);
+    inputWrapper.append(input, submit);
+    form.append(inputWrapper);
 
     // Добавляем форму в контейнер на HTML страницу
     this._container.append(form);
@@ -144,12 +145,22 @@ export default class CreditCardFormCreator implements ICreditCardFormCreator {
     const img = document.createElement('img');
     img.src = `${this._paymentMethodIconsPath}/${iconFileName.toString()}`;
     img.alt = paymentMethodName;
-    img.style.verticalAlign = 'middle';
-    img.style.marginRight = '8px';
 
     label.append(img);
 
     return label;
+  }
+
+  /**
+   * Создает обертку для инпута ввода номера карты и кнопки.
+   *
+   * @return {HTMLDivElement} Созданный элемент обертки.
+   */
+  private _createCardInputWrapper(): HTMLDivElement {
+    const wrapper = document.createElement('div');
+    wrapper.className = `${this._formClassName}__input-btn-wrapper`;
+
+    return wrapper;
   }
 
   /**

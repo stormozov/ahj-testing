@@ -1,9 +1,33 @@
 /* body */
 body {
   box-sizing: border-box;
-  font-family: 'Roboto', sans-serif;
-  font-size: 23px;
   background-color: antiquewhite;
+
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+
+a,
+button,
+input {
+  transition: all 0.3s ease-in-out;
+}
+
+button {
+  cursor: pointer;
 }
 
 .container {
@@ -11,6 +35,9 @@ body {
   margin: 0 auto;
 }
 
-.webpack-img {
-  width: 100%;
+#root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
 }
