@@ -1,7 +1,7 @@
 import { displayMessage, isValidLuhn } from '../../utils/utils';
 import { ECardType, EValidateMessageText } from './types/enums';
 
-const cardPatterns: Record<ECardType, RegExp> = {
+export const cardPatterns: Record<ECardType, RegExp> = {
   // Visa: Начинается с 4, длина 13, 16 или 19
   [ECardType.Visa]: /^4[0-9]{12}([0-9]{3})?([0-9]{3})?$/, // 13, 16, 19
 
