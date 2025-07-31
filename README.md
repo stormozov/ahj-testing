@@ -1,5 +1,7 @@
 # Домашнее задание к занятию "4.Организация тестирования"
 
+[![CI Pipeline](https://github.com/stormozov/ahj-testing/actions/workflows/ci.yml/badge.svg)](https://github.com/stormozov/ahj-testing/actions/workflows/ci.yml)
+
 Правила сдачи задания:
 
 1. **Важно**: в рамках этого ДЗ можно использовать любой менеджер пакетов
